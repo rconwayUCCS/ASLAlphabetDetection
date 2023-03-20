@@ -131,3 +131,11 @@ dmypy.json
 # All Images
 *.jpg
 *.png
+
+# All csv files
+*.csv
+
+# Dataset paths
+significant-asl-alphabet-training-set/
+significant-asl-alphabet-training-set.zip
+
