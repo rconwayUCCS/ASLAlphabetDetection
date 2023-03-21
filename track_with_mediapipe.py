@@ -19,17 +19,16 @@ def detect_hand(file, out_size):
         static_image_mode=True,
         max_num_hands=1,
         min_detection_confidence=0.5) as hands:
-        image_size = 256
-        # Read the image and resize it before detecting hands
         image = cv2.imread(file)
-        image = cv2.resize(image, (image_size, image_size))
+        #Image dimensions are stored as (y, x, color)
+        res = image.shape
         # Convert the BGR image to RGB before processing.
         results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-
-        blank = np.zeros_like(image)
-
         if not results.multi_hand_landmarks:
+            #print("Hand in %s not recognized" % file)
             return None
+        
+        blank = np.zeros_like(image)
 
         circle_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1, color=(255,255,255))
         line_spec = mp_drawing.DrawingSpec(thickness=2, color=(255,255,255))
@@ -43,10 +42,10 @@ def detect_hand(file, out_size):
                 line_spec)
 
             max_x, max_y = 0, 0
-            min_x, min_y = image_size, image_size
+            min_x, min_y = res[1], res[0]
             for idx, landmark in enumerate(hand_landmarks.landmark):
-                landmark_x = int(landmark.x * image_size)
-                landmark_y = int(landmark.y * image_size)
+                landmark_x = int(landmark.x * res[1])
+                landmark_y = int(landmark.y * res[0])
                 if (landmark_x >= max_x):
                     max_x = landmark_x
                 elif (landmark_x <= min_x):
@@ -70,11 +69,12 @@ def detect_hand(file, out_size):
             min_x -= diff
 
         cropped = blank[min_y - 8 :max_y + 8, min_x - 8:max_x + 8]
+        if not cropped.any():
+            #print("Image %s is the wrong size" % (file))
+            return None
         cropped = cv2.resize(cropped, (out_size, out_size))
         binary = cv2.threshold(cropped, 32, 255, cv2.THRESH_BINARY)[1]
-
         
-
         #plt.title("Resultant Image");plt.axis('off');plt.imshow(binary[:,:,::-1]);plt.show()
 
         return binary

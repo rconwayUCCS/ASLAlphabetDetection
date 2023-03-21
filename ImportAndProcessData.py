@@ -18,6 +18,7 @@ import csv
 #api.dataset_download_files("kuzivakwashe/significant-asl-sign-language-alphabet-dataset")
 
 #Recursively iterate through all directories and files in the given directory, converting all pictures to black and white
+#The paths to these images and their labels are stored in a csv file
 
 read = "significant-asl-alphabet-training-set\Training Set"
 read_test = "test_path"
@@ -26,27 +27,29 @@ write = "processed_images"
 
 def get_all_images(read_dir, write_dir, parent):
     i = 0
+    failures = 0
     with open('image_list.csv', mode='a', newline='') as image_list:
         writer = csv.writer(image_list, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        print("Processing ", read_dir)
         for file in os.listdir(read_dir):
-            i += 1
             full_path = os.path.join(read_dir, file)
             # checking if it is a file or directory
             if os.path.isfile(full_path):
                 output = detect_hand(full_path, 64)
                 if output is not None:
                     result_path = "%s\%s%d.jpg" % (write_dir, parent, i)
-                    print(result_path)
+                    #print(result_path)
                     cv2.imwrite(result_path, output)
                     writer.writerow([parent, result_path])
+                    i += 1
                 else:
-                    #result_path = "%s\%s%d.jpg" % (write_dir, parent, i)
-                    print("Failure at %s" % full_path)
+                    failures += 1
 
             elif os.path.isdir(full_path):
                 get_all_images(full_path, write_dir, file)
+        print("%d successes, %d failures in %s" % (i, failures, parent))
 
+with open('image_list.csv', mode='w', newline='') as image_list:
+    writer = csv.writer(image_list, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-get_all_images(read_test, write, read_test)
-
-#process_image("significant-asl-alphabet-training-set\Training Set\A\color_0_0002 (2).png", True)
+get_all_images(read, write, read)
