@@ -54,6 +54,8 @@ def detect_hand(file, out_size):
                     max_y = landmark_y
                 elif (landmark_y <= min_y):
                     min_y = landmark_y
+        
+        blank = cv2.cvtColor(blank, cv2.COLOR_RGB2GRAY)
 
         #Make sure the bounding box is a square, then crop and resize the image.
         x_dim = max_x - min_x

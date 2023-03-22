@@ -1,5 +1,6 @@
 from track_with_mediapipe import detect_hand
 from kaggle.api.kaggle_api_extended import KaggleApi
+import numpy as np
 import os.path
 import cv2
 import csv
@@ -23,12 +24,13 @@ import csv
 read = "significant-asl-alphabet-training-set\Training Set"
 read_test = "test_path"
 write = "processed_images"
+write_csv = 'image_arrays_list.csv'
 
 
 def get_all_images(read_dir, write_dir, parent):
     i = 0
     failures = 0
-    with open('image_list.csv', mode='a', newline='') as image_list:
+    with open(write_csv, mode='a', newline='') as image_list:
         writer = csv.writer(image_list, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         print("Processing ", read_dir)
         for file in os.listdir(read_dir):
@@ -39,8 +41,10 @@ def get_all_images(read_dir, write_dir, parent):
                 if output is not None:
                     result_path = "%s\%s%d.jpg" % (write_dir, parent, i)
                     #print(result_path)
-                    cv2.imwrite(result_path, output)
-                    writer.writerow([parent, result_path])
+                    #cv2.imwrite(result_path, output)
+                    print(output.shape)
+                    np.savetxt(write_csv, (np.int_(output//255)))
+                    #writer.writerow([parent, output])
                     i += 1
                 else:
                     failures += 1
@@ -49,7 +53,7 @@ def get_all_images(read_dir, write_dir, parent):
                 get_all_images(full_path, write_dir, file)
         print("%d successes, %d failures in %s" % (i, failures, parent))
 
-with open('image_list.csv', mode='w', newline='') as image_list:
-    writer = csv.writer(image_list, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+with open(write_csv, mode='w', newline='') as image_list:
+   writer = csv.writer(image_list, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
 get_all_images(read, write, read)
