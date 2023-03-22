@@ -5,7 +5,7 @@ import tensorflow as tf
 from tensorflow.keras import datasets, layers, models
 from track_with_mediapipe import detect_hand
 
-alphabet = ["A", "B", "C", "D"]
+alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
 model = models.Sequential()
 model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(64, 64, 1), batch_size = 1))
@@ -27,16 +27,16 @@ cap = cv2.VideoCapture(0)
 while(True):
     ret, frame = cap.read()
     output = detect_hand(frame, 64)
-    frame = cv2.resize(frame,(256,256))
+    frame = cv2.resize(frame,(500,400))
     cv2.imshow("Input", frame)
-    if output is None:
+    if output is not None:
+        output = np.reshape(output, (1, 64, 64, 1))
+        prediction = model.predict(np.array(output))
+        prediction_max = np.argmax(prediction)
+        
+        print(alphabet[prediction_max])
+    else:
         print("No Hand Detected")
-        continue
-    output = np.reshape(output, (1, 64, 64, 1))
-    prediction = model.predict(np.array(output))
-    prediction_max = np.argmax(prediction)
-    
-    print(alphabet[prediction_max])
 
     if cv2.waitKey(1) & 0xFF == ord(' '):#exiting
         break

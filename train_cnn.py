@@ -6,6 +6,8 @@ import tensorflow as tf
 from tensorflow.keras import datasets, layers, models
 import matplotlib.pyplot as plt
 
+alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+
 df = pd.read_csv("image_list.csv", names = ["labels", "paths"])
 
 labels_letters = df["labels"].tolist()
@@ -17,14 +19,7 @@ for img in paths:
 
 labels = []
 for let in labels_letters:
-    if let == "A":
-        labels.append(0)
-    elif let == "B":
-        labels.append(1)
-    elif let == "C":
-        labels.append(2)
-    elif let == "D":
-        labels.append(3)
+    labels.append(alphabet.index(let))
 
 train_labels, test_labels, train_images, test_images = train_test_split(labels, images, test_size=0.2, shuffle = True)
 
