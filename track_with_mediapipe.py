@@ -3,6 +3,7 @@ import mediapipe as mp
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 #Code taken from https://google.github.io/mediapipe/solutions/hands.html
 
 mp_drawing = mp.solutions.drawing_utils
@@ -19,7 +20,11 @@ def detect_hand(file, out_size):
         static_image_mode=True,
         max_num_hands=1,
         min_detection_confidence=0.5) as hands:
-        image = cv2.imread(file)
+
+        if isinstance(file, str):
+            image = cv2.imread(file)
+        else:
+            image = file
         #Image dimensions are stored as (y, x, color)
         res = image.shape
         # Convert the BGR image to RGB before processing.

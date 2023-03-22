@@ -47,15 +47,10 @@ model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
 
-history = model.fit(np.array(train_images), np.array(train_labels), epochs=10, 
+history = model.fit(np.array(train_images), np.array(train_labels), epochs=5, 
                     validation_data=(np.array(test_images), np.array(test_labels)))
 
 test_loss, test_acc = model.evaluate(np.array(test_images),  np.array(test_labels), verbose=2)
 print(test_acc)
 
-
-#for index, row in df.iterrows():
-#    image = cv2.imread(row[1])
-#    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-#    cv2.imshow("Image", image)
-#    print(image.shape)
+model.save_weights("CNN_Weights.h5")
