@@ -23,14 +23,29 @@ model.load_weights('CNN_Weights.h5')
 
 cap = cv2.VideoCapture(0)
 
+queue = [None for i in range(10)]
+
+oldest = 0
+
 while(True):
+    sum = [0] * 26
     ret, frame = cap.read()
     output = detect_hand(frame, 64)
     text = "None"
     if output is not None:
         output = np.reshape(output, (1, 64, 64, 1))
-        prediction = model.predict(np.array(output))
-        prediction_max = np.argmax(prediction)
+        prediction = model.predict(np.array(output))[0]
+        
+        queue[oldest] = prediction
+        oldest += 1
+        if oldest >= 10:
+            oldest = 0
+        for i in range(10):
+            if queue[i] is None:
+                break;
+            for j in range(26):
+                sum[j] += queue[i][j]
+        prediction_max = np.argmax(sum)
         
         text = alphabet[prediction_max]
         #print(alphabet[prediction_max])
@@ -41,6 +56,9 @@ while(True):
     image = cv2.putText(frame, text, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, 
                  (0, 0, 0), 2, cv2.LINE_AA, False)
     cv2.imshow("Video", image)
+
+
+
     if cv2.waitKey(1) & 0xFF == ord(' '):#exiting
         break
 
