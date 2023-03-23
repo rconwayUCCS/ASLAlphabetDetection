@@ -21,10 +21,10 @@ import csv
 #Recursively iterate through all directories and files in the given directory, converting all pictures to black and white
 #The paths to these images and their labels are stored in a csv file
 
-read = "significant-asl-alphabet-training-set\Training Set"
+read = "Training Set"
 read_test = "test_path"
 write = "processed_images"
-write_csv = 'image_arrays_list.csv'
+write_csv = 'image_list.csv'
 
 
 def get_all_images(read_dir, write_dir, parent):
@@ -41,10 +41,10 @@ def get_all_images(read_dir, write_dir, parent):
                 if output is not None:
                     result_path = "%s\%s%d.jpg" % (write_dir, parent, i)
                     #print(result_path)
-                    #cv2.imwrite(result_path, output)
-                    print(output.shape)
-                    np.savetxt(write_csv, (np.int_(output//255)))
-                    #writer.writerow([parent, output])
+                    cv2.imwrite(result_path, output)
+                    #print(output.shape)
+                    #np.savetxt(write_csv, (np.int_(output//255)))
+                    writer.writerow([parent, result_path])
                     i += 1
                 else:
                     failures += 1
@@ -53,7 +53,7 @@ def get_all_images(read_dir, write_dir, parent):
                 get_all_images(full_path, write_dir, file)
         print("%d successes, %d failures in %s" % (i, failures, parent))
 
-with open(write_csv, mode='w', newline='') as image_list:
-   writer = csv.writer(image_list, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+#with open(write_csv, mode='w', newline='') as image_list:
+#   writer = csv.writer(image_list, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
 get_all_images(read, write, read)
