@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
-df = pd.read_csv("image_list.csv", names = ["labels", "paths"])
+df = pd.read_csv("image_list2.csv", names = ["labels", "paths"])
 
 labels_letters = df["labels"].tolist()
 paths = df["paths"].tolist()
@@ -22,8 +22,6 @@ for let in labels_letters:
     labels.append(alphabet.index(let))
 
 train_labels, test_labels, train_images, test_images = train_test_split(labels, images, test_size=0.2, shuffle = True)
-
-print(len(train_labels))
 
 model = models.Sequential()
 model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(64, 64, 1)))
@@ -42,10 +40,10 @@ model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
 
-history = model.fit(np.array(train_images), np.array(train_labels), epochs=5, 
+history = model.fit(np.array(train_images), np.array(train_labels), epochs=10, 
                     validation_data=(np.array(test_images), np.array(test_labels)))
 
 test_loss, test_acc = model.evaluate(np.array(test_images),  np.array(test_labels), verbose=2)
 print(test_acc)
 
-model.save_weights("CNN_Weights.h5")
+model.save_weights("CNN_Weights2.h5")

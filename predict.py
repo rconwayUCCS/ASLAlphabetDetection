@@ -17,7 +17,7 @@ model.add(layers.Flatten())
 model.add(layers.Dense(64, activation='relu'))
 model.add(layers.Dense(26))
 
-model.load_weights('CNN_Weights.h5')
+model.load_weights('CNN_Weights2.h5')
 
 #model.summary()
 
@@ -59,7 +59,7 @@ while(True):
 
 
 
-    if cv2.waitKey(1) & 0xFF == ord(' '):#exiting
+    if cv2.waitKey(1) & 0xFF == ord(' '):
         break
 
 cap.release()

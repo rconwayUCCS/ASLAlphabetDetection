@@ -10,6 +10,7 @@ import csv
 
 #This file is only inteded to be run once. It will download a dataset from https://www.kaggle.com/datasets/kuzivakwashe/significant-asl-sign-language-alphabet-dataset
 #Then it will take those images and convert all of them to binary black and white images, and store them in /Processed_Images/
+#Other dataset https://www.kaggle.com/datasets/grassknoted/asl-alphabet
 #The paths to these images and their label will be stored in a csv file for training later
 
 
@@ -21,10 +22,10 @@ import csv
 #Recursively iterate through all directories and files in the given directory, converting all pictures to black and white
 #The paths to these images and their labels are stored in a csv file
 
-read = "Training Set"
+read = "TrainingSet2"
 read_test = "test_path"
-write = "processed_images"
-write_csv = 'image_list.csv'
+write = "processed_images_2"
+write_csv = 'image_list2.csv'
 
 
 def get_all_images(read_dir, write_dir, parent):
@@ -53,7 +54,7 @@ def get_all_images(read_dir, write_dir, parent):
                 get_all_images(full_path, write_dir, file)
         print("%d successes, %d failures in %s" % (i, failures, parent))
 
-#with open(write_csv, mode='w', newline='') as image_list:
-#   writer = csv.writer(image_list, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+with open(write_csv, mode='w', newline='') as image_list:
+   writer = csv.writer(image_list, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
 get_all_images(read, write, read)
