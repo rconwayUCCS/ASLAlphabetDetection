@@ -14,7 +14,7 @@ mp_hands = mp.solutions.hands
 # For static images:
 IMAGE_FILES = ["C100.jpg", "CTest.jpg", "F1.jpg"]
 
-def detect_hand(file, out_size):
+def detect_hand(file):
 
     with mp_hands.Hands(
         static_image_mode=True,
@@ -33,57 +33,16 @@ def detect_hand(file, out_size):
             #print("Hand in %s not recognized" % file)
             return None
         
-        blank = np.zeros_like(image)
-
-        circle_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1, color=(255,255,255))
-        line_spec = mp_drawing.DrawingSpec(thickness=2, color=(255,255,255))
-
+        landmarks_x = []
+        landmarks_y = []
+        landmarks_z = []
         for hand_landmarks in results.multi_hand_landmarks:
-            mp_drawing.draw_landmarks(
-                blank,
-                hand_landmarks,
-                mp_hands.HAND_CONNECTIONS,
-                circle_spec,
-                line_spec)
-
-            max_x, max_y = 0, 0
-            min_x, min_y = res[1], res[0]
             for idx, landmark in enumerate(hand_landmarks.landmark):
-                landmark_x = int(landmark.x * res[1])
-                landmark_y = int(landmark.y * res[0])
-                if (landmark_x >= max_x):
-                    max_x = landmark_x
-                elif (landmark_x <= min_x):
-                    min_x = landmark_x
-                if (landmark_y >= max_y):
-                    max_y = landmark_y
-                elif (landmark_y <= min_y):
-                    min_y = landmark_y
-        
-        blank = cv2.cvtColor(blank, cv2.COLOR_RGB2GRAY)
+                landmarks_x.append(landmark.x)
+                landmarks_y.append(landmark.y)
+                landmarks_z.append(landmark.z)
+            
 
-        #Make sure the bounding box is a square, then crop and resize the image.
-        x_dim = max_x - min_x
-        y_dim = max_y - min_y
-
-        if x_dim > y_dim:
-            diff = int((x_dim - y_dim) / 2)
-            max_y += diff
-            min_y -= diff
-        else:
-            diff = int((y_dim - x_dim) / 2)
-            max_x += diff
-            min_x -= diff
-
-        cropped = blank[min_y - 8 :max_y + 8, min_x - 8:max_x + 8]
-        if not cropped.any():
-            #print("Image %s is the wrong size" % (file))
-            return None
-        cropped = cv2.resize(cropped, (out_size, out_size))
-        binary = cv2.threshold(cropped, 32, 255, cv2.THRESH_BINARY)[1]
-        
-        #plt.title("Resultant Image");plt.axis('off');plt.imshow(binary[:,:,::-1]);plt.show()
-
-        return binary
+        return landmarks_z, landmarks_y, landmarks_x
     
-#detect_hand("C100.jpg", 64)
+#print(detect_hand("F1.jpg"))

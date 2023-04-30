@@ -47,8 +47,8 @@ def hand_to_binary(frame, skinMask, key_mask):
     return bw_image
     
 def process_image(path, show_images):
-    img = cv2.imread(path)
-    img = cv2.resize(img,(128,128))
+    img_full = cv2.imread(path)
+    img = cv2.resize(img_full,(128,128))
     
     key_points2, skin_mask = get_points_and_mask(img)
     
@@ -59,9 +59,21 @@ def process_image(path, show_images):
     if (show_images):
         cv2.imshow("Original", img)
         cv2.imshow("Keypoints", key_mask)
-        cv2.imshow("Final", hand_to_binary(cropped, skin_mask, key_mask))
+        cv2.imshow("Final", processed)
+
+        processed = cv2.resize(processed,(128,128))
+        processed = cv2.cvtColor(processed,cv2.COLOR_GRAY2RGB)
+        compare = np.concatenate((img, processed), axis=1)
+
+        cv2.imshow("Comparison", compare)
         
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-    return processed
+    processed = cv2.resize(processed,(img_full.shape[0],img_full.shape[1]))
+    processed = cv2.cvtColor(processed,cv2.COLOR_GRAY2RGB)
+    compare = np.concatenate((img_full, processed), axis=1)
+    return compare
+
+
+cv2.imwrite("CompareF.jpg", process_image("F1.jpg", False))
