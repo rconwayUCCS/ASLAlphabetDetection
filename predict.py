@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import datasets, layers, models
-from track_with_mediapipe import detect_hand, convert_palm_normal
+from track_with_mediapipe import detect_hand, convert_palm_normal, normalize
 
 
 alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
@@ -23,7 +23,7 @@ model.add(layers.Dense(512, activation='relu', input_shape=(63,), batch_size=1))
 model.add(layers.Dense(128, activation='relu'))
 model.add(layers.Dense(26))
 
-model.load_weights('Dense_Dropout_Weights.h5')
+model.load_weights('Norm_Weights.h5')
 
 model.summary()
 
@@ -37,13 +37,15 @@ def predict_live(model):
         sum = [0] * 26
         ret, frame = cap.read()
         output = detect_hand(frame)
-        hand_image = np.zeros((500, 400, 3), dtype = np.uint8)
+        image = cv2.resize(frame,(500,400))
+        hand_image = np.zeros_like(image)
         sorted_alpha = ["None", "None", "None", "None", "None"]
         if output is not None:
-            for i in range(26):
-                hand_image = cv2.circle(hand_image, (int(output[0][i] * 500), int(output[1][i]) * 400), 1, (0, 255, 0), -1)
+            for i in range(21):
+                hand_image = cv2.circle(hand_image, (int(output[0][i] * 500), int(output[1][i] * 400)), 1, (0, 255, 0), -1)
 
             output = convert_palm_normal(output[0], output[1], output[2])
+            output = normalize(output[0], output[1], output[2])
             output = np.reshape(output, (1, 63))
             prediction = model.predict(np.array(output))[0]
         
@@ -58,8 +60,6 @@ def predict_live(model):
                     sum[j] += queue[i][j]
 
             sorted_alpha = [x for _, x in sorted(zip(sum, alphabet))]
-
-        image = cv2.resize(frame,(500,400))
         
         image = cv2.putText(frame, sorted_alpha[-1], (25, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, 
                          (0, 0, 0), 2, cv2.LINE_AA, False)

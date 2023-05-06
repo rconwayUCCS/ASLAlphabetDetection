@@ -7,43 +7,16 @@ import matplotlib.pyplot as plt
 import math
 
 
-read_csv = "CoordList.csv"
+read_csv = "CoordsNormalized2.csv"
 
 with open(read_csv, mode='r', newline='') as image_list:
     reader = csv.reader(image_list, delimiter=',', quoting=csv.QUOTE_MINIMAL)
     labels = []
-    #raw_x = []
-    #raw_y = []
-    #raw_z = []
     data = []
     for row in reader:
         labels.append(float(row[0]))
-        #temp = np.array(row[1:]).astype(float)
-        
-        #raw_x = np.array(row[1:22]).astype(float)
-        #raw_y = np.array(row[22:43]).astype(float)
-        #raw_z = np.array(row[43:]).astype(float)
-        #
-        #min_x = min(raw_x)
-        #min_y = min(raw_y)
-        #min_z = min(raw_z)
-        #
-        #if min_x < 0:
-        #    raw_x += min_x
-        #if min_y < 0:
-        #    raw_y += min_y
-        #if min_z < 0:
-        #    raw_z += min_z
-        #
-        #raw_x = raw_x / max(raw_x)
-        #raw_y = raw_y / max(raw_y)
-        #raw_z = raw_z / max(raw_z)
 
         data.append(np.array(row[1:]).astype(float))
-
-
-        
-    #data = 
 
     #fig = plt.figure()
     #ax = fig.add_subplot(projection='3d')
@@ -95,10 +68,10 @@ with open(read_csv, mode='r', newline='') as image_list:
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
     
-    history = model.fit(np.array(train_data), np.array(train_labels), epochs=10, 
+    history = model.fit(np.array(train_data), np.array(train_labels), epochs=5, 
                         validation_data=(np.array(test_data), np.array(test_labels)))
     
     test_loss, test_acc = model.evaluate(np.array(test_data),  np.array(test_labels), verbose=2)
     print(test_acc)
 
-    model.save_weights("Dense_Dropout_Weights.h5")
+    model.save_weights("Norm_Weights.h5")

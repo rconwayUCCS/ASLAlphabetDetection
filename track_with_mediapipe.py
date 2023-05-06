@@ -71,23 +71,25 @@ def convert_palm_normal(xs, ys, zs):
         y_primes.append(y + ys[0])
         z_primes.append(z + zs[0])
 
+    return x_primes, y_primes, z_primes
+
+def normalize(x_primes, y_primes, z_primes):
     min_x = min(x_primes)
     min_y = min(y_primes)
     min_z = min(z_primes)
     
     if min_x < 0:
-        x_primes = [x + min_x for x in x_primes]
+        x_primes = [x - min_x for x in x_primes]
     if min_y < 0:
-        y_primes = [x + min_y for x in y_primes]
+        y_primes = [x - min_y for x in y_primes]
     if min_z < 0:
-        z_primes = [x + min_z for x in z_primes]
+        z_primes = [x - min_z for x in z_primes]
     
     x_primes = [x / max(x_primes) for x in x_primes]
     y_primes = [x / max(y_primes) for x in y_primes]
     z_primes = [x / max(z_primes) for x in z_primes]
 
     return x_primes, y_primes, z_primes
-
 
     
 #print(detect_hand("F1.jpg"))
