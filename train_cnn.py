@@ -1,5 +1,5 @@
-import pandas as pd
-import cv2
+import csv
+#import cv2
 from sklearn.model_selection import train_test_split
 import numpy as np
 import tensorflow as tf
@@ -30,33 +30,30 @@ for csv_list in read_csv:
             raw_y = np.array(row[22:43]).astype(float)
             raw_z = np.array(row[43:]).astype(float)
 
-            hand = np.zeros((image_shape, image_shape, image_shape))
+            hand = np.zeros((image_size, image_size, image_size))
 
             for i in range(21):
-                x_point = round(raw_x[i]*image_size)
-                y_point = round(raw_y[i]*image_size)
-                z_point = round(raw_z[i]*image_size)
+                x_point = round(raw_x[i]*(image_size - 1))
+                y_point = round(raw_y[i]*(image_size - 1))
+                z_point = round(raw_z[i]*(image_size - 1))
 
+                if hand[x_point, y_point, z_point] == 1:
+                    print("Overlap!")
                 hand[x_point, y_point, z_point] = 1
 
             data.append(hand)
 
-images = []
-for img in paths:
-    images.append(cv2.imread(img, cv2.IMREAD_GRAYSCALE))
 
-labels = []
-for let in labels_letters:
-    labels.append(alphabet.index(let))
+train_labels, test_labels, train_images, test_images = train_test_split(labels, data, test_size=0.2, shuffle = True)
 
-train_labels, test_labels, train_images, test_images = train_test_split(labels, images, test_size=0.2, shuffle = True)
+input_shape = (32, image_size, image_size, image_size, 1)
 
 model = models.Sequential()
-model.add(layers.Conv3D(32, (3, 3), activation='relu', input_shape=(16, 16, 16,)))
-model.add(layers.MaxPooling3D((3, 3)))
-model.add(layers.Conv3D(64, (3, 3), activation='relu'))
-model.add(layers.MaxPooling3D((2, 2)))
-model.add(layers.Conv3D(64, (3, 3), activation='relu'))
+model.add(layers.Conv3D(32, 4, activation='relu', input_shape=input_shape[1:]))
+model.add(layers.MaxPooling3D((3, 3, 3)))
+model.add(layers.Conv3D(32, 3, activation='relu'))
+#model.add(layers.MaxPooling3D((2, 2, 2)))
+#model.add(layers.Conv3D(64, (3, 3, 3), activation='relu'))
 
 model.add(layers.Flatten())
 model.add(layers.Dense(64, activation='relu'))
@@ -68,10 +65,10 @@ model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
 
-history = model.fit(np.array(train_images), np.array(train_labels), epochs=10, 
+history = model.fit(np.array(train_images), np.array(train_labels), batch_size=64, epochs=10, 
                     validation_data=(np.array(test_images), np.array(test_labels)))
 
 test_loss, test_acc = model.evaluate(np.array(test_images),  np.array(test_labels), verbose=2)
 print(test_acc)
 
-model.save_weights("CNN_Weights2.h5")
+model.save_weights("3d_Weights.h5")
