@@ -6,12 +6,40 @@ import tensorflow as tf
 from tensorflow.keras import datasets, layers, models
 import matplotlib.pyplot as plt
 
-alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+read_csv = ["CoordsNormalized2.csv"]
+            #, "CoordsBad.csv"]
+            #, "CoordsSet3.csv"]
 
-df = pd.read_csv("image_list2.csv", names = ["labels", "paths"])
+labels = []
+data = []
 
-labels_letters = df["labels"].tolist()
-paths = df["paths"].tolist()
+raw_x = []
+raw_y = []
+raw_z = []
+
+image_size = 16
+
+for csv_list in read_csv:
+    print(f"Reading from {csv_list}")
+    with open(csv_list, mode='r', newline='') as image_list:
+        reader = csv.reader(image_list, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+        for row in reader:
+            labels.append(float(row[0]))
+
+            raw_x = np.array(row[1:22]).astype(float)
+            raw_y = np.array(row[22:43]).astype(float)
+            raw_z = np.array(row[43:]).astype(float)
+
+            hand = np.zeros((image_shape, image_shape, image_shape))
+
+            for i in range(21):
+                x_point = round(raw_x[i]*image_size)
+                y_point = round(raw_y[i]*image_size)
+                z_point = round(raw_z[i]*image_size)
+
+                hand[x_point, y_point, z_point] = 1
+
+            data.append(hand)
 
 images = []
 for img in paths:
@@ -24,11 +52,11 @@ for let in labels_letters:
 train_labels, test_labels, train_images, test_images = train_test_split(labels, images, test_size=0.2, shuffle = True)
 
 model = models.Sequential()
-model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(64, 64, 1)))
-model.add(layers.MaxPooling2D((3, 3)))
-model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-model.add(layers.MaxPooling2D((2, 2)))
-model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+model.add(layers.Conv3D(32, (3, 3), activation='relu', input_shape=(16, 16, 16,)))
+model.add(layers.MaxPooling3D((3, 3)))
+model.add(layers.Conv3D(64, (3, 3), activation='relu'))
+model.add(layers.MaxPooling3D((2, 2)))
+model.add(layers.Conv3D(64, (3, 3), activation='relu'))
 
 model.add(layers.Flatten())
 model.add(layers.Dense(64, activation='relu'))
