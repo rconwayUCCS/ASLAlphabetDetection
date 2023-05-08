@@ -6,10 +6,10 @@ import csv
 #Recursively iterate through all directories and files in the given directory, calling track_with_mediapipe() on each image
 #The paths to these images and their labels are stored in a csv file
 
-read = "TrainingSet2"
+read = "TrainingSet3"
 read_test = "test_path"
 write = "processed_images_2"
-write_csv = 'CoordsNormalized2.csv'
+write_csv = 'Dummy.csv'
 
 alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
@@ -46,29 +46,29 @@ if inp != "YES":
 with open(write_csv, mode='w', newline='') as image_list:
    writer = csv.writer(image_list, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-#get_all_images(read_test, write, read_test)
+get_all_images(read, write, read)
 
-read_csv = "CoordList.csv"
+#read_csv = "CoordList.csv"
 
-with open(read_csv, mode='r', newline='') as image_list:
-    reader = csv.reader(image_list, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-    with open(write_csv, mode='a', newline='') as write_list:
-        writer = csv.writer(write_list, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-
-        raw_x = []
-        raw_y = []
-        raw_z = []
-        for row in reader:
-            label = float(row[0])
-            
-            raw_x = np.array(row[1:22]).astype(float)
-            raw_y = np.array(row[22:43]).astype(float)
-            raw_z = np.array(row[43:]).astype(float)
-
-            norm_x, norm_y, norm_z = normalize(raw_x, raw_y, raw_z)
-
-            writer.writerow([label, *norm_x, *norm_y, *norm_z])
-
-            #data.append(np.array(row[1:]).astype(float))
+#with open(read_csv, mode='r', newline='') as image_list:
+#    reader = csv.reader(image_list, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+#    with open(write_csv, mode='a', newline='') as write_list:
+#        writer = csv.writer(write_list, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+#
+#        raw_x = []
+#        raw_y = []
+#        raw_z = []
+#        for row in reader:
+#            label = float(row[0])
+#            
+#            raw_x = np.array(row[1:22]).astype(float)
+#            raw_y = np.array(row[22:43]).astype(float)
+#            raw_z = np.array(row[43:]).astype(float)
+#
+#            norm_x, norm_y, norm_z = normalize(raw_x, raw_y, raw_z)
+#
+#            writer.writerow([label, *norm_x, *norm_y, *norm_z])
+#
+#            #data.append(np.array(row[1:]).astype(float))
 
     

@@ -19,11 +19,11 @@ alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"
 #model.add(layers.Dense(26))
 
 model = models.Sequential()
-model.add(layers.Dense(512, activation='relu', input_shape=(63,), batch_size=1))
-model.add(layers.Dense(128, activation='relu'))
+model.add(layers.Dense(200, activation='relu', input_shape=(63,), batch_size=1))
+model.add(layers.Dense(100, activation='relu'))
 model.add(layers.Dense(26))
 
-model.load_weights('Norm_Weights.h5')
+model.load_weights('200_100_Weights.h5')
 
 model.summary()
 
@@ -41,10 +41,10 @@ def predict_live(model):
         hand_image = np.zeros_like(image)
         sorted_alpha = ["None", "None", "None", "None", "None"]
         if output is not None:
+            output = convert_palm_normal(output[0], output[1], output[2])
             for i in range(21):
                 hand_image = cv2.circle(hand_image, (int(output[0][i] * 500), int(output[1][i] * 400)), 1, (0, 255, 0), -1)
 
-            output = convert_palm_normal(output[0], output[1], output[2])
             output = normalize(output[0], output[1], output[2])
             output = np.reshape(output, (1, 63))
             prediction = model.predict(np.array(output))[0]
