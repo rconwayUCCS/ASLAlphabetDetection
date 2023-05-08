@@ -90,5 +90,19 @@ def normalize(x_primes, y_primes, z_primes):
 
     return x_primes, y_primes, z_primes
 
-    
+def create_hand_array(raw_x, raw_y, raw_z, image_size):
+
+    hand = np.zeros((image_size, image_size, image_size))
+
+    for i in range(21):
+        x_point = round(raw_x[i]*(image_size - 1))
+        y_point = round(raw_y[i]*(image_size - 1))
+        z_point = round(raw_z[i]*(image_size - 1))
+
+        if hand[x_point, y_point, z_point] == 1:
+            print("Overlap!")
+        hand[x_point, y_point, z_point] = 1
+    return hand
+
+
 #print(detect_hand("F1.jpg"))

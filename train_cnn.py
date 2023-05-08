@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import datasets, layers, models
+from track_with_mediapipe import create_hand_array
 import matplotlib.pyplot as plt
 
 read_csv = ["CoordsNormalized2.csv"]
@@ -30,18 +31,7 @@ for csv_list in read_csv:
             raw_y = np.array(row[22:43]).astype(float)
             raw_z = np.array(row[43:]).astype(float)
 
-            hand = np.zeros((image_size, image_size, image_size))
-
-            for i in range(21):
-                x_point = round(raw_x[i]*(image_size - 1))
-                y_point = round(raw_y[i]*(image_size - 1))
-                z_point = round(raw_z[i]*(image_size - 1))
-
-                if hand[x_point, y_point, z_point] == 1:
-                    print("Overlap!")
-                hand[x_point, y_point, z_point] = 1
-
-            data.append(hand)
+            data.append(create_hand_array(raw_x, raw_y, raw_z, image_size))
 
 
 train_labels, test_labels, train_images, test_images = train_test_split(labels, data, test_size=0.2, shuffle = True)
