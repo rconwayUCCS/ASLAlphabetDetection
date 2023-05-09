@@ -7,9 +7,7 @@ from tensorflow.keras import datasets, layers, models
 from track_with_mediapipe import create_hand_array
 import matplotlib.pyplot as plt
 
-read_csv = ["CoordsNormalized2.csv"]
-            #, "CoordsBad.csv"]
-            #, "CoordsSet3.csv"]
+read_csv = ["CoordsNormalized2.csv", "CoordsBad.csv", "CoordsSet3.csv"]
 
 labels = []
 data = []
@@ -18,7 +16,7 @@ raw_x = []
 raw_y = []
 raw_z = []
 
-image_size = 16
+image_size = 12
 
 for csv_list in read_csv:
     print(f"Reading from {csv_list}")
@@ -39,14 +37,14 @@ train_labels, test_labels, train_images, test_images = train_test_split(labels, 
 input_shape = (32, image_size, image_size, image_size, 1)
 
 model = models.Sequential()
-model.add(layers.Conv3D(32, 4, activation='relu', input_shape=input_shape[1:]))
+model.add(layers.Conv3D(32, 3, activation='relu', input_shape=input_shape[1:]))
 model.add(layers.MaxPooling3D((3, 3, 3)))
-model.add(layers.Conv3D(32, 3, activation='relu'))
+model.add(layers.Conv3D(32, 2, activation='relu'))
 #model.add(layers.MaxPooling3D((2, 2, 2)))
 #model.add(layers.Conv3D(64, (3, 3, 3), activation='relu'))
 
 model.add(layers.Flatten())
-model.add(layers.Dense(64, activation='relu'))
+model.add(layers.Dense(96, activation='relu'))
 model.add(layers.Dense(26))
 
 model.summary()
@@ -55,7 +53,7 @@ model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
 
-history = model.fit(np.array(train_images), np.array(train_labels), batch_size=64, epochs=10, 
+history = model.fit(np.array(train_images), np.array(train_labels), batch_size=32, epochs=2, 
                     validation_data=(np.array(test_images), np.array(test_labels)))
 
 test_loss, test_acc = model.evaluate(np.array(test_images),  np.array(test_labels), verbose=2)
