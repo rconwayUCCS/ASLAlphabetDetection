@@ -1,9 +1,10 @@
 import cv2
+import csv
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import datasets, layers, models
-import track_with_mediapipe as tm
-#from track_with_mediapipe import detect_hand, convert_palm_normal, normalize
+#import track_with_mediapipe as tm
+from track_with_mediapipe import *
 
 
 alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
@@ -19,20 +20,22 @@ alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"
 #model.add(layers.Dense(64, activation='relu'))
 #model.add(layers.Dense(26))
 
-input_shape = (32, image_size, image_size, image_size, 1)
+image_size = 12
+
+input_shape = (64, image_size, image_size, image_size, 1)
 
 model = models.Sequential()
-model.add(layers.Conv3D(32, 4, activation='relu', input_shape=input_shape))
+model.add(layers.Conv3D(32, 3, activation='relu', input_shape=input_shape[1:], batch_size=64))
 model.add(layers.MaxPooling3D((3, 3, 3)))
-model.add(layers.Conv3D(32, 3, activation='relu'))
+model.add(layers.Conv3D(32, 2, activation='relu'))
 #model.add(layers.MaxPooling3D((2, 2, 2)))
 #model.add(layers.Conv3D(64, (3, 3, 3), activation='relu'))
 
 model.add(layers.Flatten())
-model.add(layers.Dense(64, activation='relu'))
+model.add(layers.Dense(96, activation='relu'))
 model.add(layers.Dense(26))
 
-model.load_weights('200_100_Weights.h5')
+model.load_weights('3d_Weights.h5')
 
 model.summary()
 
@@ -90,23 +93,32 @@ def predict_from_file(csv_list, model):
     raw_x = []
     raw_y = []
     raw_z = []
-    with open(csv_list, mode='r', newline='') as image_list:
-        reader = csv.reader(image_list, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-        for row in reader:
-            labels.append(float(row[0]))
+    data = []
+    for file in csv_list:
+        with open(file, mode='r', newline='') as image_list:
+            reader = csv.reader(image_list, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+            for row in reader:
+                labels.append(float(row[0]))
 
-            raw_x = np.array(row[1:22]).astype(float)
-            raw_y = np.array(row[22:43]).astype(float)
-            raw_z = np.array(row[43:]).astype(float)
+                raw_x = np.array(row[1:22]).astype(float)
+                raw_y = np.array(row[22:43]).astype(float)
+                raw_z = np.array(row[43:]).astype(float)
 
-            data.append(create_hand_array(raw_x, raw_y, raw_z, image_size))
+                data.append(create_hand_array(raw_x, raw_y, raw_z, image_size))
 
-    model.compile(optimizer='adam',
-              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-              metrics=tf.keras.metrics.CategoricalAccuracy())
+    accuracy_dict = dict()
+    for i in range(26):
+        subset = []
+        for j, row in enumerate(data):
+            if labels[j] == i:
+                subset.append(row)
+        predictions = model.predict(np.array(subset))
+        predictions = np.argmax(predictions, axis=1)
 
-    test_loss, test_acc = model.evaluate(np.array(data),  np.array(labels))
-    print(test_acc)
+        accuracy_dict[alphabet[i]] = np.count_nonzero(predictions == i) / len(predictions)
 
-#predict_from_file("image_list2.csv", model)
-predict_live(model)
+    print(sorted(accuracy_dict.items(), key=lambda x:x[1]))
+
+read_csv = ["CoordsNormalized2.csv", "CoordsBad.csv", "CoordsSet3.csv"]
+predict_from_file(read_csv, model)
+#predict_live(model)
