@@ -22,10 +22,10 @@ alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"
 
 image_size = 12
 
-input_shape = (64, image_size, image_size, image_size, 1)
+input_shape = (32, image_size, image_size, image_size, 1)
 
 model = models.Sequential()
-model.add(layers.Conv3D(32, 3, activation='relu', input_shape=input_shape[1:], batch_size=64))
+model.add(layers.Conv3D(32, 3, activation='relu', input_shape=input_shape[1:]))
 model.add(layers.MaxPooling3D((3, 3, 3)))
 model.add(layers.Conv3D(32, 2, activation='relu'))
 #model.add(layers.MaxPooling3D((2, 2, 2)))
@@ -58,7 +58,8 @@ def predict_live(model):
                 hand_image = cv2.circle(hand_image, (int(output[0][i] * 500), int(output[1][i] * 400)), 1, (0, 255, 0), -1)
 
             output = normalize(output[0], output[1], output[2])
-            output = np.reshape(output, (1, 63))
+            output = create_hand_array(output[0], output[1], output[2], image_size)
+            output = np.reshape(output, input_shape)
             prediction = model.predict(np.array(output))[0]
         
             queue[oldest] = prediction
@@ -103,6 +104,19 @@ def predict_from_file(csv_list, model):
                 raw_x = np.array(row[1:22]).astype(float)
                 raw_y = np.array(row[22:43]).astype(float)
                 raw_z = np.array(row[43:]).astype(float)
+
+                hand = np.zeros((image_size, image_size, image_size))
+
+                for i in range(21):
+                    x_point = round(raw_x[i]*(image_size - 1))
+                    y_point = round(raw_y[i]*(image_size - 1))
+                    z_point = round(raw_z[i]*(image_size - 1))
+
+                    #if hand[x_point, y_point, z_point] == 1:
+                        #print("Overlap!")
+                    hand[x_point, y_point, z_point] = 1
+
+                #data.append(hand)
 
                 data.append(create_hand_array(raw_x, raw_y, raw_z, image_size))
 
