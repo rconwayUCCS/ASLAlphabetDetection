@@ -3,13 +3,15 @@ import csv
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import datasets, layers, models
-from track_with_mediapipe import detect_hand, convert_palm_normal, normalize
+from track_with_mediapipe import *
 
 
 alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
+
+
 model = models.Sequential()
-model.add(layers.Dense(200, activation='relu', input_shape=(63,), batch_size=1))
+model.add(layers.Dense(200, activation='relu', input_shape=(63,), batch_size=32))
 model.add(layers.Dense(100, activation='relu'))
 model.add(layers.Dense(26))
 
@@ -72,24 +74,34 @@ def predict_from_file(csv_list, model):
     raw_x = []
     raw_y = []
     raw_z = []
-    with open(csv_list, mode='r', newline='') as image_list:
-        reader = csv.reader(image_list, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-        for row in reader:
-            labels.append(float(row[0]))
 
-            raw_x = np.array(row[1:22]).astype(float)
-            raw_y = np.array(row[22:43]).astype(float)
-            raw_z = np.array(row[43:]).astype(float)
+    for file in csv_list:
+        with open(file, mode='r', newline='') as image_list:
+            reader = csv.reader(image_list, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+            for row in reader:
+                labels.append(float(row[0]))
 
-            data.append(create_hand_array(raw_x, raw_y, raw_z, image_size))
+                data.append(np.array(row[1:]).astype(float))
 
-    model.compile(optimizer='adam',
-              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-              metrics=tf.keras.metrics.CategoricalAccuracy())
+            #raw_x = np.array(row[1:22]).astype(float)
+            #raw_y = np.array(row[22:43]).astype(float)
+            #raw_z = np.array(row[43:]).astype(float)
 
-    test_loss, test_acc = model.evaluate(np.array(data),  np.array(labels))
-    print(test_acc)
+            #data.append(create_hand_array(raw_x, raw_y, raw_z, image_size))
+        
+    accuracy_dict = dict()
+    for i in range(26):
+        subset = []
+        for j, row in enumerate(data):
+            if labels[j] == i:
+                subset.append(row)
+        predictions = model.predict(np.array(subset))
+        predictions = np.argmax(predictions, axis=1)
+
+        accuracy_dict[alphabet[i]] = np.count_nonzero(predictions == i) / len(predictions)
+
+    print(sorted(accuracy_dict.items(), key=lambda x:x[1]))
 
 read_csv = ["CoordsNormalized2.csv", "CoordsBad.csv", "CoordsSet3.csv"]
-predict_from_file(read_csv[0], model)
+predict_from_file(read_csv, model)
 #predict_live(model)
